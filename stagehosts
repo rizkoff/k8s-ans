@@ -1,0 +1,4 @@
+[master]
+mst
+[workers]
+wrk[1:2]

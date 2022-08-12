@@ -1,0 +1,40 @@
+---
+- name: DBG storage
+  debug:
+    msg: 'dbg mode: {{ "true" | bool }}'
+  tags: storage_dbg
+
+- name: LVM add PV
+  ansible.builtin.shell:
+    cmd: pvcreate {{ blank_disk }}
+  tags: storage_pv
+
+- name: LVM add VG
+  ansible.builtin.shell:
+    cmd: vgcreate datavg {{ blank_disk }}
+  tags: storage_vg
+
+- name: LVM add LV
+  ansible.builtin.shell:
+    cmd: lvcreate -n datalv -l 95%FREE datavg
+  tags: storage_lv
+
+- name: mkfs lv for {{ datadir }}
+  ansible.builtin.shell:
+    cmd: mkfs -t ext4 /dev/datavg/datalv
+  tags: storage_mkfs
+
+- name: mkdir {{ datadir }}
+  ansible.builtin.shell:
+    cmd: mkdir {{ datadir }}
+  tags: storage_mkdir
+
+- name: mount {{ datadir }}
+  ansible.builtin.shell:
+    cmd: mount /dev/datavg/datalv {{ datadir }}
+  tags: storage_mount
+
+- name: update fstab with {{ datadir }}
+  lineinfile: dest=/etc/fstab line='/dev/mapper/datavg-datalv {{ datadir }} ext4 rw,relatime 0 0' state=present
+  tags: storage_fstab
+

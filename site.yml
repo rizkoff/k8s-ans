@@ -1,0 +1,8 @@
+---
+- import_playbook: k8s.yml
+
+- hosts: all
+  gather_facts: no
+  roles:
+  - role: storage
+    tags: storage
